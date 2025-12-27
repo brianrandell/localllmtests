@@ -1,0 +1,34 @@
+{
+  "models": [
+    "ministral-3",
+    "llama3.2",
+    "qwen2.5:32b",
+    "qwen3-coder:30b",
+    "deepseek-r1:32b"
+  ],
+  "prompts": [
+    {
+      "key": "A",
+      "text": "Explain async and await in C# in exactly 8 concise bullet points."
+    },
+    {
+      "key": "B",
+      "text": "Write a clean C# example that uses HttpClient to call a REST API, handles errors properly, and explains the code with inline comments."
+    },
+    {
+      "key": "C",
+      "text": "Based on the text above, summarize the key design tradeoffs in exactly 10 bullet points.",
+      "input_file": ".\\techdoctest.md"
+    },
+    {
+      "key": "D",
+      "text": "Write a detailed, structured tutorial explaining .NET Native AOT, including history, benefits, limitations, real-world use cases, and future direction."
+    }
+  ],
+  "settings": {
+    "repeat_count": 3,
+    "warmup_count": 3,
+    "smi_interval_seconds": 1,
+    "warmup_prompt_key": "A"
+  }
+}

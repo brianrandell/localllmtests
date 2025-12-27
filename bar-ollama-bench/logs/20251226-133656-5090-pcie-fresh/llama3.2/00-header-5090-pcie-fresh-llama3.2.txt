@@ -1,0 +1,31 @@
+﻿=== RUN HEADER ===
+Timestamp: 2025-12-26T13:39:04.6325569-08:00
+Mode: 5090-pcie-fresh / llama3.2
+Config: C:\ollama-tests\ollama-bench.config
+Benchmark Mode: Fresh (ollama stop between repeats)
+
+nvidia-smi:
+Fri Dec 26 13:39:04 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 591.44                 Driver Version: 591.44         CUDA Version: 13.1     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 5090      WDDM  |   00000000:02:00.0 Off |                  N/A |
+| 31%   62C    P1            345W /  575W |    7420MiB /  32607MiB |     66%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A           14484      C   ...al\Programs\Ollama\ollama.exe      N/A      |
++-----------------------------------------------------------------------------------------+
+
+ollama --version:
+ollama version is 0.13.5
+==================
