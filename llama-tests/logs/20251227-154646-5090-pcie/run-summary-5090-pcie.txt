@@ -1,0 +1,18 @@
+=== RUN HEADER ===
+Timestamp: 2025-12-27T15:46:46.6779706-08:00
+Mode: 5090-pcie
+GPU: NVIDIA GeForce RTX 5090 (31.8 GB)
+Tool: llama-bench.exe
+Prompt Tokens: 2048
+Gen Tokens: 512
+Repeats: 10
+SMI Interval: 250ms
+Models: Ministral-3-8B-Instruct-2512-Q4_K_M.gguf, phi-4-Q4_K_M.gguf, qwen2.5-coder-32b-instruct-q4_k_m.gguf, Qwen2.5-Coder-32B-Instruct-Q6_K.gguf
+
+nvidia-smi:
+Sat Dec 27 15:46:46 2025        +-----------------------------------------------------------------------------------------+ | NVIDIA-SMI 591.44                 Driver Version: 591.44         CUDA Version: 13.1     | +-----------------------------------------+------------------------+----------------------+ | GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC | | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. | |                                         |                        |               MIG M. | |=========================================+========================+======================| |   0  NVIDIA GeForce RTX 5090      WDDM  |   00000000:02:00.0 Off |                  N/A | |  0%   33C    P8              2W /  575W |       0MiB /  32607MiB |      0%      Default | |                                         |                        |                  N/A | +-----------------------------------------+------------------------+----------------------+  +-----------------------------------------------------------------------------------------+ | Processes:                                                                              | |  GPU   GI   CI              PID   Type   Process name                        GPU Memory | |        ID   ID                                                               Usage      | |=========================================================================================| |  No running processes found                                                             | +-----------------------------------------------------------------------------------------+
+==================
+
+=== RUN COMPLETE: 2025-12-27T15:51:38.7065058-08:00 ===
+Results: .\logs\20251227-154646-5090-pcie\llama-bench-results-5090-pcie.csv
+Summary: .\logs\20251227-154646-5090-pcie\llama-bench-summary-5090-pcie.csv

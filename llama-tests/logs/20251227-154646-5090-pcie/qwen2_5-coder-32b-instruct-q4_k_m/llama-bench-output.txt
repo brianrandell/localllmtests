@@ -1,0 +1,14 @@
+ggml_cuda_init: GGML_CUDA_FORCE_MMQ:    no
+ggml_cuda_init: GGML_CUDA_FORCE_CUBLAS: no
+ggml_cuda_init: found 1 CUDA devices:
+  Device 0: NVIDIA GeForce RTX 5090, compute capability 12.0, VMM: yes
+load_backend: loaded CUDA backend from C:\llama-tests\llama-cpp\ggml-cuda.dll
+load_backend: loaded RPC backend from C:\llama-tests\llama-cpp\ggml-rpc.dll
+load_backend: loaded CPU backend from C:\llama-tests\llama-cpp\ggml-cpu-alderlake.dll
+| model                          |       size |     params | backend    | ngl |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --------------: | -------------------: |
+| qwen2 32B Q4_K - Medium        |  18.48 GiB |    32.76 B | CUDA       |  99 |          pp2048 |      3093.09 ┬▒ 14.45 |
+| qwen2 32B Q4_K - Medium        |  18.48 GiB |    32.76 B | CUDA       |  99 |           tg512 |         66.29 ┬▒ 0.07 |
+
+build: 9bf20d8ac (7547)
+

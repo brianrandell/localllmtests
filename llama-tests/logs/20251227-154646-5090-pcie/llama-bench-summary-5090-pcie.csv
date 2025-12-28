@@ -1,0 +1,5 @@
+mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples
+5090-pcie,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,10554.58,35.71,208.73,0.34,5894,578.58,413.1,105
+5090-pcie,phi-4-Q4_K_M,8.43,6706.69,44.66,138.34,0.19,9702,580.99,483,157
+5090-pcie,qwen2.5-coder-32b-instruct-q4_k_m,18.49,3093.09,14.45,66.29,0.07,20040,576.55,507,324
+5090-pcie,Qwen2.5-Coder-32B-Instruct-Q6_K,25.04,2528.96,12.96,51.67,0.06,26554,584.72,524.2,418
