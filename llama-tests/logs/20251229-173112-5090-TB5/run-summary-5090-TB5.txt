@@ -1,0 +1,18 @@
+=== RUN HEADER ===
+Timestamp: 2025-12-29T17:31:12.1694233-08:00
+Mode: 5090-TB5
+GPU: NVIDIA GeForce RTX 5090 (31.8 GB)
+Tool: llama-bench.exe
+Prompt Tokens: 2048
+Gen Tokens: 512
+Repeats: 10
+SMI Interval: 250ms
+Models: Ministral-3-8B-Instruct-2512-Q4_K_M.gguf, phi-4-Q4_K_M.gguf, qwen2.5-coder-32b-instruct-q4_k_m.gguf, Qwen2.5-Coder-32B-Instruct-Q6_K.gguf
+
+nvidia-smi:
+Mon Dec 29 17:31:12 2025        +-----------------------------------------------------------------------------------------+ | NVIDIA-SMI 591.44                 Driver Version: 591.44         CUDA Version: 13.1     | +-----------------------------------------+------------------------+----------------------+ | GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC | | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. | |                                         |                        |               MIG M. | |=========================================+========================+======================| |   0  NVIDIA GeForce RTX 5090      WDDM  |   00000000:8D:00.0 Off |                  N/A | |  0%   37C    P8              3W /  575W |      25MiB /  32607MiB |      0%      Default | |                                         |                        |                  N/A | +-----------------------------------------+------------------------+----------------------+  +-----------------------------------------------------------------------------------------+ | Processes:                                                                              | |  GPU   GI   CI              PID   Type   Process name                        GPU Memory | |        ID   ID                                                               Usage      | |=========================================================================================| |  No running processes found                                                             | +-----------------------------------------------------------------------------------------+
+==================
+
+=== RUN COMPLETE: 2025-12-29T17:36:25.2771072-08:00 ===
+Results: .\logs\20251229-173112-5090-TB5\llama-bench-results-5090-TB5.csv
+Summary: .\logs\20251229-173112-5090-TB5\llama-bench-summary-5090-TB5.csv

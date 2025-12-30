@@ -1,0 +1,4 @@
+﻿mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples
+3090-PCIe-ScarletWitch,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,4051.68,19.75,116.76,0.42,6059,419.23,357.1,202
+3090-PCIe-ScarletWitch,phi-4-Q4_K_M,8.43,2473.34,7.09,77.24,0.14,9867,419.73,391.5,283
+3090-PCIe-ScarletWitch,qwen2.5-coder-32b-instruct-q4_k_m,18.49,1161.1,3.54,36.26,0.04,20205,420.28,390.6,597

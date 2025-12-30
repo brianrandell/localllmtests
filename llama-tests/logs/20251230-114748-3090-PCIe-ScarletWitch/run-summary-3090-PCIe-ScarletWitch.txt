@@ -1,0 +1,18 @@
+﻿=== RUN HEADER ===
+Timestamp: 2025-12-30T11:47:48.4780794-08:00
+Mode: 3090-PCIe-ScarletWitch
+GPU: NVIDIA GeForce RTX 3090 (24 GB)
+Tool: llama-bench.exe
+Prompt Tokens: 2048
+Gen Tokens: 512
+Repeats: 10
+SMI Interval: 250ms
+Models: Ministral-3-8B-Instruct-2512-Q4_K_M.gguf, phi-4-Q4_K_M.gguf, qwen2.5-coder-32b-instruct-q4_k_m.gguf
+
+nvidia-smi:
+Tue Dec 30 11:47:48 2025        +-----------------------------------------------------------------------------------------+ | NVIDIA-SMI 591.44                 Driver Version: 591.44         CUDA Version: 13.1     | +-----------------------------------------+------------------------+----------------------+ | GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC | | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. | |                                         |                        |               MIG M. | |=========================================+========================+======================| |   0  NVIDIA GeForce RTX 3090      WDDM  |   00000000:16:00.0  On |                  N/A | |  0%   37C    P8             27W /  420W |     483MiB /  24576MiB |      0%      Default | |                                         |                        |                  N/A | +-----------------------------------------+------------------------+----------------------+  +-----------------------------------------------------------------------------------------+ | Processes:                                                                              | |  GPU   GI   CI              PID   Type   Process name                        GPU Memory | |        ID   ID                                                               Usage      | |=========================================================================================| |    0   N/A  N/A            1384    C+G   ...h_cw5n1h2txyewy\SearchApp.exe      N/A      | |    0   N/A  N/A            7192    C+G   ...8bbwe\PhoneExperienceHost.exe      N/A      | |    0   N/A  N/A           10096    C+G   ...5n1h2txyewy\TextInputHost.exe      N/A      | |    0   N/A  N/A           14376    C+G   ...Next\CNext\RadeonSoftware.exe      N/A      | |    0   N/A  N/A           14608    C+G   ...xyewy\ShellExperienceHost.exe      N/A      | |    0   N/A  N/A           19624    C+G   ...crosoft\OneDrive\OneDrive.exe      N/A      | |    0   N/A  N/A           20056    C+G   ...D\CNext\CNext\AMDRSSrcExt.exe      N/A      | |    0   N/A  N/A           21032    C+G   C:\Windows\explorer.exe               N/A      | +-----------------------------------------------------------------------------------------+
+==================
+
+=== RUN COMPLETE: 2025-12-30T11:53:10.4937546-08:00 ===
+Results: .\logs\20251230-114748-3090-PCIe-ScarletWitch\llama-bench-results-3090-PCIe-ScarletWitch.csv
+Summary: .\logs\20251230-114748-3090-PCIe-ScarletWitch\llama-bench-summary-3090-PCIe-ScarletWitch.csv

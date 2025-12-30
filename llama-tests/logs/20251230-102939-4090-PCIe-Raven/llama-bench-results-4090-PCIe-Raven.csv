@@ -1,0 +1,7 @@
+mode,model,model_size_gb,test,tokens,repetitions,avg_tok_s,stddev_tok_s,gpu_mem_max_mb,gpu_power_max_w,gpu_power_mean_w,gpu_temp_max_c,gpu_util_max_pct,gpu_util_mean_pct,gpu_samples,run_timestamp
+4090-PCIe-Raven,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,pp2048,2048,10,8387.7,48.49,6226,432.32,334.2,58,100,91,141,2025-12-30T10:30:23.0444997-08:00
+4090-PCIe-Raven,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,tg512,512,10,140.41,0.46,6226,432.32,334.2,58,100,91,141,2025-12-30T10:30:23.0488319-08:00
+4090-PCIe-Raven,phi-4-Q4_K_M,8.43,pp2048,2048,10,5061.85,20.03,10033,441.94,366,67,100,91.4,230,2025-12-30T10:31:30.2800692-08:00
+4090-PCIe-Raven,phi-4-Q4_K_M,8.43,tg512,512,10,89.22,0.11,10033,441.94,366,67,100,91.4,230,2025-12-30T10:31:30.2815185-08:00
+4090-PCIe-Raven,qwen2.5-coder-32b-instruct-q4_k_m,18.49,pp2048,2048,10,2350.62,5.37,20371,449.07,370.9,70,100,92.5,487,2025-12-30T10:33:52.2446690-08:00
+4090-PCIe-Raven,qwen2.5-coder-32b-instruct-q4_k_m,18.49,tg512,512,10,42.08,0.03,20371,449.07,370.9,70,100,92.5,487,2025-12-30T10:33:52.2456335-08:00

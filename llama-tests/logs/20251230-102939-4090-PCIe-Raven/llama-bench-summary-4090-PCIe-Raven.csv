@@ -1,0 +1,4 @@
+mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples
+4090-PCIe-Raven,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,8387.7,48.49,140.41,0.46,6226,432.32,334.2,141
+4090-PCIe-Raven,phi-4-Q4_K_M,8.43,5061.85,20.03,89.22,0.11,10033,441.94,366,230
+4090-PCIe-Raven,qwen2.5-coder-32b-instruct-q4_k_m,18.49,2350.62,5.37,42.08,0.03,20371,449.07,370.9,487

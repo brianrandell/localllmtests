@@ -1,0 +1,5 @@
+mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples
+5090-TB5,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,9380.2,39.13,180.62,2.41,5918,527.55,376,117
+5090-TB5,phi-4-Q4_K_M,8.43,6259.7,20.8,125.94,0.67,9726,578.18,461.3,170
+5090-TB5,qwen2.5-coder-32b-instruct-q4_k_m,18.49,2908.21,14.17,62.48,0.32,20064,579.47,498.3,343
+5090-TB5,Qwen2.5-Coder-32B-Instruct-Q6_K,25.04,2402.54,12.03,49.08,0.11,26578,579.63,524.9,438

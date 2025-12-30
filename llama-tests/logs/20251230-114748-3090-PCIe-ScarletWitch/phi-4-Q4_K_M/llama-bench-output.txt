@@ -1,0 +1,20 @@
+﻿llama-bench.exe : ggml_cuda_init: GGML_CUDA_FORCE_MMQ:    no
+At C:\llama-tests\run-llama-bench.ps1:301 char:20
++ ... nchOutput = & $LlamaBenchExe -m $ModelPath -p $PromptTokens -n $GenTo ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ggml_cuda_init:...ORCE_MMQ:    no:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ggml_cuda_init: GGML_CUDA_FORCE_CUBLAS: no
+ggml_cuda_init: found 1 CUDA devices:
+  Device 0: NVIDIA GeForce RTX 3090, compute capability 8.6, VMM: yes
+load_backend: loaded CUDA backend from C:\llama-tests\llama-cpp\ggml-cuda.dll
+load_backend: loaded RPC backend from C:\llama-tests\llama-cpp\ggml-rpc.dll
+load_backend: loaded CPU backend from C:\llama-tests\llama-cpp\ggml-cpu-skylakex.dll
+| model                          |       size |     params | backend    | ngl |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --------------: | -------------------: |
+| phi3 14B Q4_K - Medium         |   8.43 GiB |    14.66 B | CUDA       |  99 |          pp2048 |       2473.34 ┬▒ 7.09 |
+| phi3 14B Q4_K - Medium         |   8.43 GiB |    14.66 B | CUDA       |  99 |           tg512 |         77.24 ┬▒ 0.14 |
+
+build: 9bf20d8ac (7547)
+

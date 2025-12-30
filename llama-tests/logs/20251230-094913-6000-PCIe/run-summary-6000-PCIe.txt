@@ -1,0 +1,18 @@
+=== RUN HEADER ===
+Timestamp: 2025-12-30T09:49:13.6165295-08:00
+Mode: 6000-PCIe
+GPU: NVIDIA RTX PRO 6000 Blackwell Workstation Edition (95.6 GB)
+Tool: llama-bench.exe
+Prompt Tokens: 2048
+Gen Tokens: 512
+Repeats: 10
+SMI Interval: 250ms
+Models: Ministral-3-8B-Instruct-2512-Q4_K_M.gguf, phi-4-Q4_K_M.gguf, qwen2.5-coder-32b-instruct-q4_k_m.gguf, Qwen2.5-Coder-32B-Instruct-Q6_K.gguf
+
+nvidia-smi:
+Tue Dec 30 09:49:13 2025        +-----------------------------------------------------------------------------------------+ | NVIDIA-SMI 591.44                 Driver Version: 591.44         CUDA Version: 13.1     | +-----------------------------------------+------------------------+----------------------+ | GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC | | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. | |                                         |                        |               MIG M. | |=========================================+========================+======================| |   0  NVIDIA RTX PRO 6000 Blac...  WDDM  |   00000000:02:00.0 Off |                  Off | | 30%   26C    P8              5W /  600W |       0MiB /  97887MiB |      0%      Default | |                                         |                        |                  N/A | +-----------------------------------------+------------------------+----------------------+  +-----------------------------------------------------------------------------------------+ | Processes:                                                                              | |  GPU   GI   CI              PID   Type   Process name                        GPU Memory | |        ID   ID                                                               Usage      | |=========================================================================================| |  No running processes found                                                             | +-----------------------------------------------------------------------------------------+
+==================
+
+=== RUN COMPLETE: 2025-12-30T09:54:39.3976449-08:00 ===
+Results: .\logs\20251230-094913-6000-PCIe\llama-bench-results-6000-PCIe.csv
+Summary: .\logs\20251230-094913-6000-PCIe\llama-bench-summary-6000-PCIe.csv
