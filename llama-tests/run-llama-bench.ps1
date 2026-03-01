@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Runs llama-bench.exe on multiple GGUF models with nvidia-smi monitoring.
     Auto-detects GPU and selects appropriate models based on VRAM.
@@ -8,9 +8,14 @@
     Captures GPU metrics (VRAM, power, temp, utilization) during each run.
     
     GPU Detection:
-    - 96GB+ (RTX 6000 PRO): Runs 6 models including 70B models
-    - 32GB+ (RTX 5090): Runs 4 models including Q6_K large model
-    - 24GB (RTX 3090/4090): Runs 3 models (Q4_K_M only)
+    - 96GB+ (RTX PRO 6000): Full suite including 70B-122B models
+    - 32GB+ (RTX 5090): Medium models including Q6 quants
+    - 24GB (RTX 3090/4090): Base models (Q4_K_M only)
+    - 11GB (Legacy): Small models only
+
+.NOTES
+    Date: 2026-02-28 (Major v2 - updated models)
+    Total Download Size: ~800 GB (all models)
 
 .PARAMETER Mode
     Test mode identifier (e.g., "6000-pcie", "5090-pcie", "4090-pcie", "3090-pcie")
@@ -25,10 +30,13 @@
 .PARAMETER Repeats
     Number of llama-bench repetitions per model (default: 10)
 
+.PARAMETER ListModels
+    List all models that would be run for the detected GPU and exit.
+
 .EXAMPLE
     .\run-llama-bench.ps1 -ListGpus
     .\run-llama-bench.ps1 -Mode "6000-pcie" -Gpu 0
-    .\run-llama-bench.ps1 -Mode "5090-pcie" -Gpu 1
+    .\run-llama-bench.ps1 -Mode "5090-pcie" -Gpu 1 -ListModels
     .\run-llama-bench.ps1 -Mode "4090-pcie" -Repeats 5
 #>
 
@@ -39,6 +47,8 @@ param(
     [int]$Gpu = -1,
     
     [switch]$ListGpus,
+    
+    [switch]$ListModels,
     
     [int]$Repeats = 10,
     
@@ -52,6 +62,44 @@ param(
 # Paths
 $LlamaBenchExe = ".\llama-cpp\llama-bench.exe"
 $GgufDir = ".\gguf"
+
+# ============================================
+# Model Definitions
+# ============================================
+# Format: @{ Path = "relative/path.gguf"; Desc = "Description"; SizeGB = approx }
+# For split files, use the -00001-of-XXXXX.gguf part
+
+$Models11GB = @(
+    @{ Path = "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"; Desc = "Llama 3.1 8B Q4"; SizeGB = 4.6 },
+    @{ Path = "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"; Desc = "Qwen 2.5 Coder 7B Q4"; SizeGB = 4.4 },
+    @{ Path = "Ministral-8B-Instruct-2410-Q4_K_M.gguf"; Desc = "Ministral 8B Q4"; SizeGB = 4.6 }
+)
+
+$Models24GB = @(
+    @{ Path = "phi-4-Q4_K_M.gguf"; Desc = "Phi-4 14B Q4"; SizeGB = 8.4 },
+    @{ Path = "Qwen2.5-Coder-32B-Instruct-Q4_K_M.gguf"; Desc = "Qwen 2.5 Coder 32B Q4"; SizeGB = 18.5 },
+    @{ Path = "Nemotron-3-Nano-30B-A3B-UD-Q4_K_XL.gguf"; Desc = "Nemotron-3-Nano 30B MoE Q4"; SizeGB = 21.3 },
+    @{ Path = "Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf"; Desc = "Qwen 3.5 35B MoE Q4 [NEW]"; SizeGB = 19.2 }
+)
+
+$Models32GB = @(
+    @{ Path = "Qwen2.5-Coder-32B-Instruct-Q6_K.gguf"; Desc = "Qwen 2.5 Coder 32B Q6"; SizeGB = 25.0 },
+    @{ Path = "Qwen3.5-27B-Q6_K.gguf"; Desc = "Qwen 3.5 27B Dense Q6 [NEW]"; SizeGB = 20.9 }
+)
+
+$Models96GB = @(
+    @{ Path = "DeepSeek-R1-Distill-Llama-70B-Q4_K_M.gguf"; Desc = "DeepSeek-R1 70B Q4"; SizeGB = 39.6 },
+    @{ Path = "Qwen2.5-72B-Instruct-Q4_K_M.gguf"; Desc = "Qwen 2.5 72B Q4"; SizeGB = 44.2 },
+    @{ Path = "gpt-oss-20b-mxfp4.gguf"; Desc = "GPT-OSS 20B MXFP4"; SizeGB = 11.3 },
+    # Split files - point to first part
+    @{ Path = "Qwen2.5-72B-Instruct-Q8_0\Qwen2.5-72B-Instruct-Q8_0-00001-of-00002.gguf"; Desc = "Qwen 2.5 72B Q8 [Split]"; SizeGB = 72.0 },
+    @{ Path = "Meta-Llama-3.1-70B-Instruct-Q6_K\Meta-Llama-3.1-70B-Instruct-Q6_K-00001-of-00002.gguf"; Desc = "Llama 3.1 70B Q6 [Split]"; SizeGB = 53.9 },
+    @{ Path = "Meta-Llama-3.1-70B-Instruct-Q8_0\Meta-Llama-3.1-70B-Instruct-Q8_0-00001-of-00002.gguf"; Desc = "Llama 3.1 70B Q8 [Split]"; SizeGB = 69.8 },
+    @{ Path = "c4ai-command-r-plus-08-2024-Q4_K_M\c4ai-command-r-plus-08-2024-Q4_K_M-00001-of-00002.gguf"; Desc = "Command-R+ 104B Q4 [Split]"; SizeGB = 58.5 },
+    @{ Path = "c4ai-command-r-plus-08-2024-Q6_K\c4ai-command-r-plus-08-2024-Q6_K-00001-of-00003.gguf"; Desc = "Command-R+ 104B Q6 [Split]"; SizeGB = 79.3 },
+    @{ Path = "Qwen3.5-122B\Q4_K_M\Qwen3.5-122B-A10B-Q4_K_M-00001-of-00003.gguf"; Desc = "Qwen 3.5 122B MoE Q4 [NEW Split]"; SizeGB = 69.2 },
+    @{ Path = "gpt-oss-120b\gpt-oss-120b-mxfp4-00001-of-00003.gguf"; Desc = "GPT-OSS 120B MoE MXFP4 [Split]"; SizeGB = 59.0 }
+)
 
 # ============================================
 # List GPUs Mode
@@ -81,7 +129,7 @@ if ($ListGpus) {
 # ============================================
 # Validate Mode Parameter
 # ============================================
-if (-not $Mode) {
+if (-not $Mode -and -not $ListModels) {
     Write-Error "Mode parameter is required. Use -ListGpus to see available GPUs."
     Write-Host "Example: .\run-llama-bench.ps1 -Mode '5090-pcie' -Gpu 1" -ForegroundColor Yellow
     exit 1
@@ -152,112 +200,116 @@ Write-Host "  CUDA_VISIBLE_DEVICES=$Gpu" -ForegroundColor DarkGray
 # Model Selection Based on VRAM
 # ============================================
 
-# Base models (fit on 24GB cards)
-$Models24GB = @(
-    "Ministral-3-8B-Instruct-2512-Q4_K_M.gguf",
-    "phi-4-Q4_K_M.gguf",
-    "qwen2.5-coder-32b-instruct-q4_k_m.gguf"
-)
+# Build model list based on VRAM
+$SelectedModels = @()
+$ProfileName = ""
 
-# Additional model for 32GB+ cards
-$Model32GBOnly = "Qwen2.5-Coder-32B-Instruct-Q6_K.gguf"
-
-# Additional models for 96GB+ cards (70B class)
-$Models96GB = @(
-    "DeepSeek-R1-Distill-Llama-70B-Q4_K_M.gguf",
-    "Qwen2.5-72B-Instruct-Q4_K_M.gguf"
-)
-
-# Select models based on VRAM
 if ($gpuVramMb -ge 90000) {
-    # 96GB+ card (RTX 6000 PRO, etc.)
-    $Models = $Models24GB + @($Model32GBOnly) + $Models96GB
-    Write-Host "  Profile: 96GB+ (6 models including 70B)" -ForegroundColor Magenta
+    # 96GB+ card (RTX PRO 6000 Blackwell, etc.)
+    $SelectedModels = $Models11GB + $Models24GB + $Models32GB + $Models96GB
+    $ProfileName = "96GB+ (Full Suite)"
 } elseif ($gpuVramMb -ge 30000) {
-    # 32GB+ card (5090, etc.)
-    $Models = $Models24GB + @($Model32GBOnly)
-    Write-Host "  Profile: 32GB+ (4 models)" -ForegroundColor Green
+    # 32GB+ card (RTX 5090, etc.)
+    $SelectedModels = $Models11GB + $Models24GB + $Models32GB
+    $ProfileName = "32GB+ (Medium)"
+} elseif ($gpuVramMb -ge 20000) {
+    # 24GB card (RTX 3090, 4090, etc.)
+    $SelectedModels = $Models11GB + $Models24GB
+    $ProfileName = "24GB (Consumer)"
 } else {
-    # 24GB card (3090, 4090, etc.)
-    $Models = $Models24GB
-    Write-Host "  Profile: 24GB (3 models)" -ForegroundColor Yellow
+    # 11GB or less
+    $SelectedModels = $Models11GB
+    $ProfileName = "11GB (Legacy)"
 }
 
+Write-Host "  Profile: $ProfileName ($($SelectedModels.Count) models)" -ForegroundColor Magenta
 Write-Host ""
+
+# ============================================
+# List Models Mode
+# ============================================
+if ($ListModels) {
+    Write-Host "Models for $ProfileName profile:" -ForegroundColor Cyan
+    Write-Host ""
+    $idx = 0
+    foreach ($model in $SelectedModels) {
+        $idx++
+        $modelPath = Join-Path $GgufDir $model.Path
+        $exists = if (Test-Path $modelPath) { "[OK]" } else { "[MISSING]" }
+        $color = if (Test-Path $modelPath) { "Green" } else { "Red" }
+        Write-Host ("  {0,2}. {1,-45} {2,7} GB  {3}" -f $idx, $model.Desc, $model.SizeGB, $exists) -ForegroundColor $color
+    }
+    Write-Host ""
+    exit 0
+}
 
 # ============================================
 # Verify Models Exist
 # ============================================
 $MissingModels = @()
-foreach ($ModelFile in $Models) {
-    $ModelPath = Join-Path $GgufDir $ModelFile
+foreach ($model in $SelectedModels) {
+    $ModelPath = Join-Path $GgufDir $model.Path
     if (-not (Test-Path $ModelPath)) {
-        $MissingModels += $ModelFile
+        $MissingModels += $model
     }
 }
 
 if ($MissingModels.Count -gt 0) {
     Write-Host "Missing model files:" -ForegroundColor Red
     foreach ($m in $MissingModels) {
-        Write-Host "  - $m" -ForegroundColor Red
+        Write-Host "  - $($m.Desc): $($m.Path)" -ForegroundColor Red
     }
     Write-Host ""
-    Write-Host "Download missing models to: $GgufDir" -ForegroundColor Yellow
+    Write-Host "Run download script to get missing models:" -ForegroundColor Yellow
+    Write-Host "  .\download-all-models-v3.ps1" -ForegroundColor Gray
     Write-Host ""
-    Write-Host "Download links:" -ForegroundColor Cyan
-    Write-Host "  Ministral-3 (4.8GB):" -ForegroundColor White
-    Write-Host "    https://huggingface.co/unsloth/Ministral-3-8B-Instruct-2512-GGUF/resolve/main/Ministral-3-8B-Instruct-2512-Q4_K_M.gguf"
-    Write-Host ""
-    Write-Host "  Phi-4 (8.4GB):" -ForegroundColor White
-    Write-Host "    https://huggingface.co/lmstudio-community/phi-4-GGUF/resolve/main/phi-4-Q4_K_M.gguf"
-    Write-Host ""
-    Write-Host "  Qwen 32B Q4 (18.5GB):" -ForegroundColor White
-    Write-Host "    https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct-GGUF/resolve/main/qwen2.5-coder-32b-instruct-q4_k_m.gguf"
-    Write-Host ""
-    Write-Host "  Qwen 32B Q6 (25GB):" -ForegroundColor White
-    Write-Host "    https://huggingface.co/bartowski/Qwen2.5-Coder-32B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-32B-Instruct-Q6_K.gguf"
-    Write-Host ""
-    Write-Host "  DeepSeek-R1 70B Q4 (40GB) [96GB+ only]:" -ForegroundColor White
-    Write-Host "    https://huggingface.co/bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF/resolve/main/DeepSeek-R1-Distill-Llama-70B-Q4_K_M.gguf"
-    Write-Host ""
-    Write-Host "  Qwen 2.5 72B Q4 (47GB) [96GB+ only]:" -ForegroundColor White
-    Write-Host "    https://huggingface.co/bartowski/Qwen2.5-72B-Instruct-GGUF/resolve/main/Qwen2.5-72B-Instruct-Q4_K_M.gguf"
-    Write-Host ""
-    exit 1
+    Write-Host "Or continue with available models? (Ctrl+C to abort)" -ForegroundColor Yellow
+    
+    # Filter to only existing models
+    $SelectedModels = $SelectedModels | Where-Object { 
+        $ModelPath = Join-Path $GgufDir $_.Path
+        Test-Path $ModelPath 
+    }
+    
+    if ($SelectedModels.Count -eq 0) {
+        Write-Error "No models available. Exiting."
+        exit 1
+    }
+    
+    Write-Host "Continuing with $($SelectedModels.Count) available models..." -ForegroundColor Yellow
+    Start-Sleep -Seconds 3
 }
 
 # ============================================
-# Setup Logging
+# Setup Output Directories
 # ============================================
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$LogDir = ".\logs\$Timestamp-$Mode"
+$LogDir = ".\logs\$Mode-$Timestamp"
 New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
 
-$CsvFile = "$LogDir\llama-bench-results-$Mode.csv"
-$SummaryFile = "$LogDir\llama-bench-summary-$Mode.csv"
-$RunSummaryFile = "$LogDir\run-summary-$Mode.txt"
+$CsvFile = Join-Path $LogDir "results.csv"
+$SummaryFile = Join-Path $LogDir "summary.csv"
+$RunSummaryFile = Join-Path $LogDir "run-summary.txt"
 
-# Initialize CSV with headers
-$CsvHeaders = "mode,model,model_size_gb,test,tokens,repetitions,avg_tok_s,stddev_tok_s,gpu_mem_max_mb,gpu_power_max_w,gpu_power_mean_w,gpu_temp_max_c,gpu_util_max_pct,gpu_util_mean_pct,gpu_samples,run_timestamp"
-$CsvHeaders | Out-File -FilePath $CsvFile -Encoding UTF8
+# CSV Header
+"mode,model,size_gb,test,tokens,repeats,tok_per_sec,stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_temp_c,gpu_util_max_pct,gpu_util_mean_pct,gpu_samples,timestamp" | Out-File -FilePath $CsvFile -Encoding UTF8
 
-# Capture system info (for selected GPU)
-$NvidiaSmiInfo = & nvidia-smi -i $Gpu 2>&1
+# Get nvidia-smi info
+$NvidiaSmiInfo = nvidia-smi -i $Gpu --query-gpu=name,memory.total,driver_version,vbios_version --format=csv 2>&1 | Out-String
 
-# Write run header
 @"
-=== RUN HEADER ===
-Timestamp: $(Get-Date -Format "o")
+==================
+llama-bench Run
+==================
 Mode: $Mode
-GPU Index: $Gpu
-GPU: $gpuName ($gpuVramGb GB)
-CUDA_VISIBLE_DEVICES: $Gpu
-Tool: llama-bench.exe
-Prompt Tokens: $PromptTokens
-Gen Tokens: $GenTokens
+GPU: $Gpu - $gpuName ($gpuVramGb GB)
+Profile: $ProfileName
+Timestamp: $Timestamp
 Repeats: $Repeats
 SMI Interval: ${SmiIntervalMs}ms
-Models: $($Models -join ', ')
+Models: $($SelectedModels.Count)
+
+$($SelectedModels | ForEach-Object { "  - $($_.Desc)" } | Out-String)
 
 nvidia-smi:
 $NvidiaSmiInfo
@@ -268,7 +320,8 @@ Write-Host "llama-bench Hardware Comparison"
 Write-Host "================================"
 Write-Host "Mode: $Mode"
 Write-Host "GPU $Gpu : $gpuName ($gpuVramGb GB)"
-Write-Host "Models: $($Models.Count)"
+Write-Host "Profile: $ProfileName"
+Write-Host "Models: $($SelectedModels.Count)"
 Write-Host "Repeats: $Repeats"
 Write-Host "SMI Interval: ${SmiIntervalMs}ms"
 Write-Host "Output: $LogDir"
@@ -388,14 +441,16 @@ function Parse-LlamaBenchOutput {
 $ModelIndex = 0
 $AllResults = @()
 
-foreach ($ModelFile in $Models) {
+foreach ($model in $SelectedModels) {
     $ModelIndex++
-    $ModelPath = Join-Path $GgufDir $ModelFile
+    $ModelPath = Join-Path $GgufDir $model.Path
     
-    $ModelName = [System.IO.Path]::GetFileNameWithoutExtension($ModelFile)
-    Write-Host "[$ModelIndex/$($Models.Count)] Model: $ModelName"
+    $ModelName = $model.Desc
+    $ModelFileName = [System.IO.Path]::GetFileNameWithoutExtension($model.Path)
+    Write-Host "[$ModelIndex/$($SelectedModels.Count)] $ModelName"
+    Write-Host "  File: $($model.Path)" -ForegroundColor DarkGray
     
-    $ModelLogDir = Join-Path $LogDir $ModelName.Replace(".", "_")
+    $ModelLogDir = Join-Path $LogDir ($ModelFileName -replace "[^\w\-]", "_")
     New-Item -ItemType Directory -Path $ModelLogDir -Force | Out-Null
     
     $GpuLogFile = Join-Path $ModelLogDir "nvidia-smi.csv"
@@ -416,6 +471,14 @@ foreach ($ModelFile in $Models) {
     $ParsedResults = Parse-LlamaBenchOutput -Output $BenchOutput
     $GpuMetrics = Get-GpuMetrics -LogFile $GpuLogFile
     $FileSizeGb = [math]::Round((Get-Item $ModelPath).Length / 1GB, 2)
+    
+    # For split files, calculate total size
+    $parentDir = Split-Path $ModelPath -Parent
+    $baseName = [System.IO.Path]::GetFileName($ModelPath) -replace "-00001-of-\d+\.gguf$", ""
+    if ($model.Path -match "-00001-of-\d+\.gguf$") {
+        $allParts = Get-ChildItem -Path $parentDir -Filter "$baseName*.gguf" -ErrorAction SilentlyContinue
+        $FileSizeGb = [math]::Round(($allParts | Measure-Object -Property Length -Sum).Sum / 1GB, 2)
+    }
     
     foreach ($result in $ParsedResults) {
         Write-Host "    $($result.Test): $($result.TokPerSec) ± $($result.StdDev) tok/s"
@@ -448,6 +511,7 @@ foreach ($ModelFile in $Models) {
 # ============================================
 Write-Host "=== SUMMARY ==="
 Write-Host "GPU $Gpu : $gpuName ($gpuVramGb GB)"
+Write-Host "Profile: $ProfileName"
 Write-Host ""
 
 $SummaryHeaders = "mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples"
@@ -481,4 +545,3 @@ Summary: $SummaryFile
 Write-Host "=== RUN COMPLETE ==="
 Write-Host "Results: $CsvFile"
 Write-Host "Summary: $SummaryFile"
-

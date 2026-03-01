@@ -1,0 +1,41 @@
+==================
+llama-bench Run
+==================
+Mode: Gwen-6000-pcie-x8
+GPU: 0 - NVIDIA RTX PRO 6000 Blackwell Workstation Edition (95.6 GB)
+Profile: 96GB+ (Full Suite)
+Timestamp: 20260301-090858
+Repeats: 10
+SMI Interval: 250ms
+Models: 19
+
+  - Llama 3.1 8B Q4
+  - Qwen 2.5 Coder 7B Q4
+  - Ministral 8B Q4
+  - Phi-4 14B Q4
+  - Qwen 2.5 Coder 32B Q4
+  - Nemotron-3-Nano 30B MoE Q4
+  - Qwen 3.5 35B MoE Q4 [NEW]
+  - Qwen 2.5 Coder 32B Q6
+  - Qwen 3.5 27B Dense Q6 [NEW]
+  - DeepSeek-R1 70B Q4
+  - Qwen 2.5 72B Q4
+  - GPT-OSS 20B MXFP4
+  - Qwen 2.5 72B Q8 [Split]
+  - Llama 3.1 70B Q6 [Split]
+  - Llama 3.1 70B Q8 [Split]
+  - Command-R+ 104B Q4 [Split]
+  - Command-R+ 104B Q6 [Split]
+  - Qwen 3.5 122B MoE Q4 [NEW Split]
+  - GPT-OSS 120B MoE MXFP4 [Split]
+
+
+nvidia-smi:
+name, memory.total [MiB], driver_version, vbios_version
+NVIDIA RTX PRO 6000 Blackwell Workstation Edition, 97887 MiB, 591.59, 98.02.81.00.07
+
+==================
+
+=== RUN COMPLETE: 2026-03-01T09:51:33.6099140-08:00 ===
+Results: .\results\Gwen-6000-pcie-x8-20260301-090858\results.csv
+Summary: .\results\Gwen-6000-pcie-x8-20260301-090858\summary.csv
