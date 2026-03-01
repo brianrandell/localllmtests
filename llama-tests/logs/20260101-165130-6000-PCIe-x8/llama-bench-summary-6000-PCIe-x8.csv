@@ -1,0 +1,5 @@
+mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples
+6000-PCIe-x8,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,11422.65,13.26,202.42,0.35,5952,583.52,390.4,111
+6000-PCIe-x8,phi-4-Q4_K_M,8.43,7201.48,23.25,135.95,0.19,9760,601.55,489.8,162
+6000-PCIe-x8,qwen2.5-coder-32b-instruct-q4_k_m,18.49,3316.01,11.22,64.84,0.06,20098,600.43,521.1,334
+6000-PCIe-x8,Qwen2.5-Coder-32B-Instruct-Q6_K,25.04,2681.64,12.06,50.91,0.05,26612,602.99,538,430

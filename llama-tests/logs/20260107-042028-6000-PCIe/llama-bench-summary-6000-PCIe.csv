@@ -1,0 +1,7 @@
+mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples
+6000-PCIe,DeepSeek-R1-Distill-Llama-70B-Q4_K_M,39.6,1519.79,7.46,32.54,0.03,41770,602.99,541,669
+6000-PCIe,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,11429.44,23.4,200.28,1.48,5952,583.64,390.8,109
+6000-PCIe,phi-4-Q4_K_M,8.43,7203.27,23.8,134.46,0.63,9760,600.52,489,162
+6000-PCIe,Qwen2.5-72B-Instruct-Q4_K_M,44.16,1539.55,7.91,29.84,0.02,46336,602.37,510,771
+6000-PCIe,qwen2.5-coder-32b-instruct-q4_k_m,18.49,3315.33,12.56,64.52,0.12,20098,600.7,518.2,339
+6000-PCIe,Qwen2.5-Coder-32B-Instruct-Q6_K,25.04,2682.16,12.59,50.78,0.09,26612,602.84,539.6,429

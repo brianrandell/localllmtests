@@ -1,0 +1,7 @@
+mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples
+6000-pcie,DeepSeek-R1-Distill-Llama-70B-Q4_K_M,39.6,1516.8,7.61,32.53,0.03,41770,603.42,547.2,663
+6000-pcie,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,11437.44,14.21,198.99,1.01,5952,584.22,390.8,111
+6000-pcie,phi-4-Q4_K_M,8.43,7204.77,24.58,133.95,0.36,9760,603.28,490.3,162
+6000-pcie,Qwen2.5-72B-Instruct-Q4_K_M,44.16,1521.46,7.87,29.83,0.02,46336,602.09,536.1,736
+6000-pcie,qwen2.5-coder-32b-instruct-q4_k_m,18.49,3308.56,11.82,64.52,0.08,20098,604.1,527.3,331
+6000-pcie,Qwen2.5-Coder-32B-Instruct-Q6_K,25.04,2673.12,13.14,50.72,0.07,26612,605.28,548,419

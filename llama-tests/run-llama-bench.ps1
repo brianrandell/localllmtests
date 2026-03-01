@@ -8,16 +8,18 @@
     Captures GPU metrics (VRAM, power, temp, utilization) during each run.
     
     GPU Detection:
+    - 96GB+ (RTX 6000 PRO): Runs 6 models including 70B models
     - 32GB+ (RTX 5090): Runs 4 models including Q6_K large model
     - 24GB (RTX 3090/4090): Runs 3 models (Q4_K_M only)
 
 .PARAMETER Mode
-    Test mode identifier (e.g., "5090-pcie", "4090-pcie", "3090-pcie")
+    Test mode identifier (e.g., "6000-pcie", "5090-pcie", "4090-pcie", "3090-pcie")
 
 .PARAMETER Repeats
     Number of llama-bench repetitions per model (default: 10)
 
 .EXAMPLE
+    .\run-llama-bench.ps1 -Mode "6000-pcie"
     .\run-llama-bench.ps1 -Mode "5090-pcie"
     .\run-llama-bench.ps1 -Mode "4090-pcie" -Repeats 5
 #>
@@ -72,8 +74,18 @@ $Models24GB = @(
 # Additional model for 32GB+ cards
 $Model32GBOnly = "Qwen2.5-Coder-32B-Instruct-Q6_K.gguf"
 
+# Additional models for 96GB+ cards (70B class)
+$Models96GB = @(
+    "DeepSeek-R1-Distill-Llama-70B-Q4_K_M.gguf",
+    "Qwen2.5-72B-Instruct-Q4_K_M.gguf"
+)
+
 # Select models based on VRAM
-if ($gpuVramMb -ge 30000) {
+if ($gpuVramMb -ge 90000) {
+    # 96GB+ card (RTX 6000 PRO, etc.)
+    $Models = $Models24GB + @($Model32GBOnly) + $Models96GB
+    Write-Host "  Profile: 96GB+ (6 models including 70B)" -ForegroundColor Magenta
+} elseif ($gpuVramMb -ge 30000) {
     # 32GB+ card (5090, etc.)
     $Models = $Models24GB + @($Model32GBOnly)
     Write-Host "  Profile: 32GB+ (4 models)" -ForegroundColor Green
@@ -105,10 +117,24 @@ if ($MissingModels.Count -gt 0) {
     Write-Host "Download missing models to: $GgufDir" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Download links:" -ForegroundColor Cyan
-    Write-Host "  Ministral-3:  https://huggingface.co/unsloth/Ministral-3-8B-Instruct-2512-GGUF/resolve/main/Ministral-3-8B-Instruct-2512-Q4_K_M.gguf"
-    Write-Host "  Phi-4:        https://huggingface.co/lmstudio-community/phi-4-GGUF/resolve/main/phi-4-Q4_K_M.gguf"
-    Write-Host "  Qwen 32B Q4:  https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct-GGUF (use huggingface-cli)"
-    Write-Host "  Qwen 32B Q6:  https://huggingface.co/bartowski/Qwen2.5-Coder-32B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-32B-Instruct-Q6_K.gguf"
+    Write-Host "  Ministral-3 (4.8GB):" -ForegroundColor White
+    Write-Host "    https://huggingface.co/unsloth/Ministral-3-8B-Instruct-2512-GGUF/resolve/main/Ministral-3-8B-Instruct-2512-Q4_K_M.gguf"
+    Write-Host ""
+    Write-Host "  Phi-4 (8.4GB):" -ForegroundColor White
+    Write-Host "    https://huggingface.co/lmstudio-community/phi-4-GGUF/resolve/main/phi-4-Q4_K_M.gguf"
+    Write-Host ""
+    Write-Host "  Qwen 32B Q4 (18.5GB):" -ForegroundColor White
+    Write-Host "    https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct-GGUF/resolve/main/qwen2.5-coder-32b-instruct-q4_k_m.gguf"
+    Write-Host ""
+    Write-Host "  Qwen 32B Q6 (25GB):" -ForegroundColor White
+    Write-Host "    https://huggingface.co/bartowski/Qwen2.5-Coder-32B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-32B-Instruct-Q6_K.gguf"
+    Write-Host ""
+    Write-Host "  DeepSeek-R1 70B Q4 (40GB) [96GB+ only]:" -ForegroundColor White
+    Write-Host "    https://huggingface.co/bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF/resolve/main/DeepSeek-R1-Distill-Llama-70B-Q4_K_M.gguf"
+    Write-Host ""
+    Write-Host "  Qwen 2.5 72B Q4 (47GB) [96GB+ only]:" -ForegroundColor White
+    Write-Host "    https://huggingface.co/bartowski/Qwen2.5-72B-Instruct-GGUF/resolve/main/Qwen2.5-72B-Instruct-Q4_K_M.gguf"
+    Write-Host ""
     exit 1
 }
 
