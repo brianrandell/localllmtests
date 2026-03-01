@@ -1,0 +1,20 @@
+=== RUN HEADER ===
+Timestamp: 2026-02-09T19:55:24.2180572-08:00
+Mode: 5090-tb5-feb-09
+GPU Index: 1
+GPU: NVIDIA GeForce RTX 5090 (31.8 GB)
+CUDA_VISIBLE_DEVICES: 1
+Tool: llama-bench.exe
+Prompt Tokens: 2048
+Gen Tokens: 512
+Repeats: 10
+SMI Interval: 250ms
+Models: Ministral-3-8B-Instruct-2512-Q4_K_M.gguf, phi-4-Q4_K_M.gguf, qwen2.5-coder-32b-instruct-q4_k_m.gguf, Qwen2.5-Coder-32B-Instruct-Q6_K.gguf
+
+nvidia-smi:
+Mon Feb  9 19:55:24 2026        +-----------------------------------------------------------------------------------------+ | NVIDIA-SMI 591.44                 Driver Version: 591.44         CUDA Version: 13.1     | +-----------------------------------------+------------------------+----------------------+ | GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC | | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. | |                                         |                        |               MIG M. | |=========================================+========================+======================| |   1  NVIDIA GeForce RTX 5090      WDDM  |   00000000:8D:00.0  On |                  N/A | |  0%   38C    P8             15W /  575W |    2074MiB /  32607MiB |      0%      Default | |                                         |                        |                  N/A | +-----------------------------------------+------------------------+----------------------+  +-----------------------------------------------------------------------------------------+ | Processes:                                                                              | |  GPU   GI   CI              PID   Type   Process name                        GPU Memory | |        ID   ID                                                               Usage      | |=========================================================================================| |    1   N/A  N/A           11608    C+G   C:\Windows\explorer.exe               N/A      | |    1   N/A  N/A           11668    C+G   ...t\Edge\Application\msedge.exe      N/A      | |    1   N/A  N/A           11868    C+G   ...indows\System32\ShellHost.exe      N/A      | |    1   N/A  N/A           12196    C+G   ...2txyewy\CrossDeviceResume.exe      N/A      | |    1   N/A  N/A           15472    C+G   ...0.3719.115\msedgewebview2.exe      N/A      | |    1   N/A  N/A           16320    C+G   ...App_cw5n1h2txyewy\LockApp.exe      N/A      | |    1   N/A  N/A           17488    C+G   ...5n1h2txyewy\TextInputHost.exe      N/A      | |    1   N/A  N/A           17968    C+G   ...8bbwe\PhoneExperienceHost.exe      N/A      | |    1   N/A  N/A           20240    C+G   ...crosoft\OneDrive\OneDrive.exe      N/A      | |    1   N/A  N/A           20828    C+G   ...t\Edge\Application\msedge.exe      N/A      | +-----------------------------------------------------------------------------------------+
+==================
+
+=== RUN COMPLETE: 2026-02-09T20:00:35.5090650-08:00 ===
+Results: .\logs\20260209-195524-5090-tb5-feb-09\llama-bench-results-5090-tb5-feb-09.csv
+Summary: .\logs\20260209-195524-5090-tb5-feb-09\llama-bench-summary-5090-tb5-feb-09.csv

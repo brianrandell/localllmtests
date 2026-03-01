@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Runs llama-bench.exe on multiple GGUF models with nvidia-smi monitoring.
     Auto-detects GPU and selects appropriate models based on VRAM.
@@ -15,18 +15,30 @@
 .PARAMETER Mode
     Test mode identifier (e.g., "6000-pcie", "5090-pcie", "4090-pcie", "3090-pcie")
 
+.PARAMETER Gpu
+    GPU index to use (0, 1, etc.). Use -ListGpus to see available GPUs.
+    If not specified, uses GPU 0.
+
+.PARAMETER ListGpus
+    List available GPUs and exit.
+
 .PARAMETER Repeats
     Number of llama-bench repetitions per model (default: 10)
 
 .EXAMPLE
-    .\run-llama-bench.ps1 -Mode "6000-pcie"
-    .\run-llama-bench.ps1 -Mode "5090-pcie"
+    .\run-llama-bench.ps1 -ListGpus
+    .\run-llama-bench.ps1 -Mode "6000-pcie" -Gpu 0
+    .\run-llama-bench.ps1 -Mode "5090-pcie" -Gpu 1
     .\run-llama-bench.ps1 -Mode "4090-pcie" -Repeats 5
 #>
 
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [string]$Mode,
+    
+    [int]$Gpu = -1,
+    
+    [switch]$ListGpus,
     
     [int]$Repeats = 10,
     
@@ -42,23 +54,99 @@ $LlamaBenchExe = ".\llama-cpp\llama-bench.exe"
 $GgufDir = ".\gguf"
 
 # ============================================
+# List GPUs Mode
+# ============================================
+if ($ListGpus) {
+    Write-Host "Available GPUs:" -ForegroundColor Cyan
+    $gpuList = nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader,nounits 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "nvidia-smi failed. Is an NVIDIA GPU present?"
+        exit 1
+    }
+    
+    $gpuList -split "`n" | ForEach-Object {
+        $parts = $_ -split ","
+        if ($parts.Count -ge 3) {
+            $idx = $parts[0].Trim()
+            $name = $parts[1].Trim()
+            $vram = [math]::Round([int]$parts[2].Trim() / 1024, 1)
+            Write-Host "  GPU ${idx}: $name ($vram GB)" -ForegroundColor White
+        }
+    }
+    Write-Host ""
+    Write-Host "Usage: .\run-llama-bench.ps1 -Mode <name> -Gpu <index>" -ForegroundColor Yellow
+    exit 0
+}
+
+# ============================================
+# Validate Mode Parameter
+# ============================================
+if (-not $Mode) {
+    Write-Error "Mode parameter is required. Use -ListGpus to see available GPUs."
+    Write-Host "Example: .\run-llama-bench.ps1 -Mode '5090-pcie' -Gpu 1" -ForegroundColor Yellow
+    exit 1
+}
+
+# ============================================
 # GPU Detection
 # ============================================
-Write-Host "Detecting GPU..." -ForegroundColor Cyan
+Write-Host "Detecting GPU(s)..." -ForegroundColor Cyan
 
-$gpuInfo = nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits 2>&1
+# Get list of all GPUs
+$gpuList = nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader,nounits 2>&1
 if ($LASTEXITCODE -ne 0) {
     Write-Error "nvidia-smi failed. Is an NVIDIA GPU present?"
     exit 1
 }
 
-$gpuParts = $gpuInfo -split ","
-$gpuName = $gpuParts[0].Trim()
-$gpuVramMb = [int]$gpuParts[1].Trim()
+$gpuArray = @()
+$gpuList -split "`n" | ForEach-Object {
+    $parts = $_ -split ","
+    if ($parts.Count -ge 3) {
+        $gpuArray += @{
+            Index = [int]$parts[0].Trim()
+            Name = $parts[1].Trim()
+            VramMb = [int]$parts[2].Trim()
+        }
+    }
+}
+
+# Show available GPUs
+if ($gpuArray.Count -gt 1) {
+    Write-Host "  Found $($gpuArray.Count) GPUs:" -ForegroundColor Yellow
+    foreach ($g in $gpuArray) {
+        $vramGb = [math]::Round($g.VramMb / 1024, 1)
+        Write-Host "    GPU $($g.Index): $($g.Name) ($vramGb GB)" -ForegroundColor White
+    }
+}
+
+# Select GPU
+if ($Gpu -eq -1) {
+    if ($gpuArray.Count -gt 1) {
+        Write-Host ""
+        Write-Host "  Multiple GPUs detected. Use -Gpu <index> to select." -ForegroundColor Yellow
+        Write-Host "  Defaulting to GPU 0." -ForegroundColor Yellow
+    }
+    $Gpu = 0
+}
+
+if ($Gpu -ge $gpuArray.Count) {
+    Write-Error "GPU $Gpu not found. Available GPUs: 0-$($gpuArray.Count - 1)"
+    exit 1
+}
+
+$selectedGpu = $gpuArray | Where-Object { $_.Index -eq $Gpu }
+$gpuName = $selectedGpu.Name
+$gpuVramMb = $selectedGpu.VramMb
 $gpuVramGb = [math]::Round($gpuVramMb / 1024, 1)
 
-Write-Host "  GPU: $gpuName"
+Write-Host ""
+Write-Host "  Selected GPU $Gpu : $gpuName" -ForegroundColor Green
 Write-Host "  VRAM: $gpuVramGb GB ($gpuVramMb MB)"
+
+# Set CUDA_VISIBLE_DEVICES to use only the selected GPU
+$env:CUDA_VISIBLE_DEVICES = "$Gpu"
+Write-Host "  CUDA_VISIBLE_DEVICES=$Gpu" -ForegroundColor DarkGray
 
 # ============================================
 # Model Selection Based on VRAM
@@ -153,15 +241,17 @@ $RunSummaryFile = "$LogDir\run-summary-$Mode.txt"
 $CsvHeaders = "mode,model,model_size_gb,test,tokens,repetitions,avg_tok_s,stddev_tok_s,gpu_mem_max_mb,gpu_power_max_w,gpu_power_mean_w,gpu_temp_max_c,gpu_util_max_pct,gpu_util_mean_pct,gpu_samples,run_timestamp"
 $CsvHeaders | Out-File -FilePath $CsvFile -Encoding UTF8
 
-# Capture system info
-$NvidiaSmiInfo = & nvidia-smi 2>&1
+# Capture system info (for selected GPU)
+$NvidiaSmiInfo = & nvidia-smi -i $Gpu 2>&1
 
 # Write run header
 @"
 === RUN HEADER ===
 Timestamp: $(Get-Date -Format "o")
 Mode: $Mode
+GPU Index: $Gpu
 GPU: $gpuName ($gpuVramGb GB)
+CUDA_VISIBLE_DEVICES: $Gpu
 Tool: llama-bench.exe
 Prompt Tokens: $PromptTokens
 Gen Tokens: $GenTokens
@@ -177,7 +267,7 @@ $NvidiaSmiInfo
 Write-Host "llama-bench Hardware Comparison"
 Write-Host "================================"
 Write-Host "Mode: $Mode"
-Write-Host "GPU: $gpuName ($gpuVramGb GB)"
+Write-Host "GPU $Gpu : $gpuName ($gpuVramGb GB)"
 Write-Host "Models: $($Models.Count)"
 Write-Host "Repeats: $Repeats"
 Write-Host "SMI Interval: ${SmiIntervalMs}ms"
@@ -188,7 +278,7 @@ Write-Host ""
 # GPU Monitor Functions
 # ============================================
 function Start-GpuMonitor {
-    param([string]$LogFile, [int]$IntervalMs = 500)
+    param([string]$LogFile, [int]$IntervalMs = 500, [int]$GpuIndex = 0)
     
     $logDir = Split-Path -Parent $LogFile
     if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
@@ -200,7 +290,7 @@ function Start-GpuMonitor {
 `$outFile = '$($LogFile -replace "'", "''")'
 while (`$true) {
     `$ts = Get-Date -Format o
-    `$smi = nvidia-smi --query-gpu=memory.used,memory.total,utilization.gpu,power.draw,temperature.gpu --format=csv,noheader,nounits 2>&1
+    `$smi = nvidia-smi -i $GpuIndex --query-gpu=memory.used,memory.total,utilization.gpu,power.draw,temperature.gpu --format=csv,noheader,nounits 2>&1
     `$line = "`$ts,`$smi"
     [System.IO.File]::AppendAllText(`$outFile, `$line + [Environment]::NewLine, [System.Text.Encoding]::UTF8)
     Start-Sleep -Milliseconds $IntervalMs
@@ -240,8 +330,6 @@ function Get-GpuMetrics {
             $parts = $line -split ","
             if ($parts.Count -ge 6) {
                 try {
-                    # nvidia-smi returns: memory.used, memory.total, utilization.gpu, power.draw, temperature.gpu
-                    # After timestamp, indices are: [1]=mem_used, [2]=mem_total, [3]=util, [4]=power, [5]=temp
                     $memUsed = [double]($parts[1].Trim()) 
                     $util = [double]($parts[3].Trim())
                     $power = [double]($parts[4].Trim())
@@ -256,7 +344,6 @@ function Get-GpuMetrics {
                     $utilSum += $util
                     $count++
                 } catch {
-                    # Skip lines that can't be parsed
                 }
             }
         }
@@ -278,8 +365,6 @@ function Parse-LlamaBenchOutput {
     $lines = $Output -split "`n"
     
     foreach ($line in $lines) {
-        # Match lines like: | model | size | params | backend | ngl | test | t/s |
-        # Note: ± may appear as various encodings (±, ┬▒, etc.)
         if ($line -match '^\|\s*([^|]+)\s*\|\s*([\d.]+)\s*GiB\s*\|\s*([\d.]+)\s*B\s*\|\s*(\w+)\s*\|\s*(\d+)\s*\|\s*(pp\d+|tg\d+)\s*\|\s*([\d.]+)\s*.{1,3}\s*([\d.]+)\s*\|') {
             $results += @{
                 Model = $Matches[1].Trim()
@@ -310,44 +395,31 @@ foreach ($ModelFile in $Models) {
     $ModelName = [System.IO.Path]::GetFileNameWithoutExtension($ModelFile)
     Write-Host "[$ModelIndex/$($Models.Count)] Model: $ModelName"
     
-    # Create model-specific log dir
     $ModelLogDir = Join-Path $LogDir $ModelName.Replace(".", "_")
     New-Item -ItemType Directory -Path $ModelLogDir -Force | Out-Null
     
-    # Start GPU monitor
     $GpuLogFile = Join-Path $ModelLogDir "nvidia-smi.csv"
     "timestamp,mem_used_mb,mem_total_mb,util_pct,power_w,temp_c" | Out-File -FilePath $GpuLogFile -Encoding UTF8
-    $GpuProc = Start-GpuMonitor -LogFile $GpuLogFile -IntervalMs $SmiIntervalMs
+    $GpuProc = Start-GpuMonitor -LogFile $GpuLogFile -IntervalMs $SmiIntervalMs -GpuIndex $Gpu
     
-    # Small delay to ensure monitoring starts
     Start-Sleep -Milliseconds 500
     
-    # Run llama-bench
     Write-Host "  Running llama-bench (pp$PromptTokens, tg$GenTokens, r$Repeats)..."
     $BenchOutput = & $LlamaBenchExe -m $ModelPath -p $PromptTokens -n $GenTokens -r $Repeats 2>&1 | Out-String
     
-    # Stop GPU monitor
     if ($GpuProc -and -not $GpuProc.HasExited) {
         Stop-Process -Id $GpuProc.Id -Force -ErrorAction SilentlyContinue
     }
     
-    # Save raw output
     $BenchOutput | Out-File -FilePath (Join-Path $ModelLogDir "llama-bench-output.txt") -Encoding UTF8
     
-    # Parse results
     $ParsedResults = Parse-LlamaBenchOutput -Output $BenchOutput
-    
-    # Get GPU metrics
     $GpuMetrics = Get-GpuMetrics -LogFile $GpuLogFile
-    
-    # Get model file size
     $FileSizeGb = [math]::Round((Get-Item $ModelPath).Length / 1GB, 2)
     
-    # Output results
     foreach ($result in $ParsedResults) {
         Write-Host "    $($result.Test): $($result.TokPerSec) ± $($result.StdDev) tok/s"
         
-        # Add to CSV
         $CsvLine = "$Mode,$ModelName,$FileSizeGb,$($result.Test),$($result.Test -replace '[^\d]',''),$Repeats,$($result.TokPerSec),$($result.StdDev),$($GpuMetrics.MemMaxMb),$($GpuMetrics.PowerMaxW),$($GpuMetrics.PowerMeanW),$($GpuMetrics.TempMaxC),$($GpuMetrics.UtilMaxPct),$($GpuMetrics.UtilMeanPct),$($GpuMetrics.Samples),$(Get-Date -Format 'o')"
         $CsvLine | Out-File -FilePath $CsvFile -Append -Encoding UTF8
         
@@ -375,7 +447,7 @@ foreach ($ModelFile in $Models) {
 # Generate Summary
 # ============================================
 Write-Host "=== SUMMARY ==="
-Write-Host "GPU: $gpuName ($gpuVramGb GB)"
+Write-Host "GPU $Gpu : $gpuName ($gpuVramGb GB)"
 Write-Host ""
 
 $SummaryHeaders = "mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples"
@@ -399,7 +471,6 @@ foreach ($group in $GroupedResults) {
     }
 }
 
-# Append completion to run summary
 @"
 
 === RUN COMPLETE: $(Get-Date -Format "o") ===
@@ -410,3 +481,4 @@ Summary: $SummaryFile
 Write-Host "=== RUN COMPLETE ==="
 Write-Host "Results: $CsvFile"
 Write-Host "Summary: $SummaryFile"
+
