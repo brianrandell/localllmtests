@@ -1,0 +1,31 @@
+==================
+llama-bench Run
+==================
+Mode: Gwen-5090-TB5
+GPU: 1 - NVIDIA GeForce RTX 5090 (31.8 GB)
+Profile: 32GB+ (Medium)
+Timestamp: 20260314-185650
+Repeats: 10
+SMI Interval: 250ms
+Models: 9
+
+  - Llama 3.1 8B Q4
+  - Qwen 2.5 Coder 7B Q4
+  - Ministral 8B Q4
+  - Phi-4 14B Q4
+  - Qwen 2.5 Coder 32B Q4
+  - Nemotron-3-Nano 30B MoE Q4
+  - Qwen 3.5 35B MoE Q4 [NEW]
+  - Qwen 2.5 Coder 32B Q6
+  - Qwen 3.5 27B Dense Q6 [NEW]
+
+
+nvidia-smi:
+name, memory.total [MiB], driver_version, vbios_version
+NVIDIA GeForce RTX 5090, 32607 MiB, 595.79, 98.02.2e.40.a3
+
+==================
+
+=== RUN COMPLETE: 2026-03-14T19:06:18.3766101-07:00 ===
+Results: .\logs\Gwen-5090-TB5-20260314-185650\results.csv
+Summary: .\logs\Gwen-5090-TB5-20260314-185650\summary.csv

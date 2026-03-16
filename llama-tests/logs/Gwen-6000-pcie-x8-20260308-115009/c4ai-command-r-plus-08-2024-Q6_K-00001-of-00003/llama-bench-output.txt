@@ -1,0 +1,12 @@
+ggml_cuda_init: found 1 CUDA devices:
+  Device 0: NVIDIA RTX PRO 6000 Blackwell Workstation Edition, compute capability 12.0, VMM: yes
+load_backend: loaded CUDA backend from E:\llama-tests\llama-cpp\ggml-cuda.dll
+load_backend: loaded RPC backend from E:\llama-tests\llama-cpp\ggml-rpc.dll
+load_backend: loaded CPU backend from E:\llama-tests\llama-cpp\ggml-cpu-alderlake.dll
+| model                          |       size |     params | backend    | ngl |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --------------: | -------------------: |
+| command-r ?B Q6_K              |  79.31 GiB |   103.81 B | CUDA       |  99 |          pp2048 |        866.97 ┬▒ 6.05 |
+| command-r ?B Q6_K              |  79.31 GiB |   103.81 B | CUDA       |  99 |           tg512 |         16.69 ┬▒ 0.01 |
+
+build: 05728db18 (8182)
+
