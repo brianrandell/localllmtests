@@ -1,98 +1,88 @@
-﻿# Get-DisplayConfig.ps1 - Maps monitors to GPUs
+﻿# Get-DisplayConfig.ps1 v2 - Maps monitors to GPUs via PnP parent relationships
 
-# Get all display adapters
-$adapters = Get-PnpDevice -Class Display -Status OK | Select-Object FriendlyName, InstanceId
-
-# Get all monitors with connection info
-$monitors = Get-CimInstance -Namespace root\wmi -ClassName WmiMonitorConnectionParams | ForEach-Object {
-    $path = $_.InstanceName
-    $adapterId = ($path -split '\\')[2] -replace '&UID.*', ''
-    
-    $monitorId = Get-CimInstance -Namespace root\wmi -ClassName WmiMonitorID | 
-        Where-Object { $_.InstanceName -eq $path }
-    $name = if ($monitorId) { 
-        -join ($monitorId.UserFriendlyName | Where-Object {$_ -ne 0} | ForEach-Object {[char]$_}) 
-    } else { "Unknown" }
-    
-    [PSCustomObject]@{
-        Monitor = $name
-        AdapterID = $adapterId
-        Connection = switch ($_.VideoOutputTechnology) {
-            0 {"VGA"}; 2 {"S-Video"}; 3 {"Composite"}; 4 {"Component"}
-            5 {"DisplayPort"}; 6 {"DisplayPort"}; 8 {"DVI"}; 9 {"DVI"}
-            10 {"HDMI"}; 11 {"Internal/eDP"}; 12 {"SDI"}; 14 {"DisplayPort"}
-            default {"Unknown ($($_.VideoOutputTechnology))"}
-        }
+function Get-ConnectionName {
+    param([int]$Value)
+    switch ($Value) {
+        0  { "VGA" }
+        1  { "S-Video" }
+        2  { "Composite" }
+        3  { "Component" }
+        4  { "DVI" }
+        5  { "HDMI" }
+        6  { "LVDS" }
+        8  { "D-Terminal" }
+        9  { "SDI" }
+        10 { "DisplayPort" }
+        11 { "DisplayPort (Embedded/eDP)" }
+        12 { "UDI (External)" }
+        13 { "UDI (Embedded)" }
+        14 { "SDTV Dongle" }
+        15 { "Miracast" }
+        16 { "Wired Indirect" }
+        17 { "Virtual Indirect" }
+        80 { "Internal" }
+        -1 { "Other" }
+        -2 { "Uninitialized" }
+        default { "Unknown ($Value)" }
     }
 }
-
-# Build adapter ID to GPU name mapping by checking which adapters have displays
-$adapterMap = @{}
-foreach ($adapter in $adapters) {
-    # Check nvidia-smi for display status
-    $gpuIdx = $null
-    if ($adapter.FriendlyName -like "*NVIDIA*" -or $adapter.FriendlyName -like "*RTX*" -or $adapter.FriendlyName -like "*GeForce*") {
-        # It's an NVIDIA GPU - we'll map by checking display_active
-    } elseif ($adapter.FriendlyName -like "*Intel*") {
-        # Intel iGPU
-    }
-}
-
-# Group monitors by adapter ID and show with GPU names
-$grouped = $monitors | Group-Object AdapterID
 
 Write-Host "`n=== Display Configuration ===" -ForegroundColor Cyan
 Write-Host ""
 
+# Get all active monitors as PnP devices
+$monitors = Get-PnpDevice -Class Monitor -Status OK -ErrorAction SilentlyContinue
+
+# Pull WMI data once
+$wmiIds   = Get-CimInstance -Namespace root\wmi -ClassName WmiMonitorID -ErrorAction SilentlyContinue
+$wmiConns = Get-CimInstance -Namespace root\wmi -ClassName WmiMonitorConnectionParams -ErrorAction SilentlyContinue
+
+# Build monitor info with parent-GPU resolution
+$monitorInfo = foreach ($mon in $monitors) {
+    # Parent of a monitor PnP device is the display adapter (GPU)
+    $parentId = (Get-PnpDeviceProperty -InstanceId $mon.InstanceId `
+        -KeyName 'DEVPKEY_Device_Parent' -ErrorAction SilentlyContinue).Data
+    $parentDev = if ($parentId) { Get-PnpDevice -InstanceId $parentId -ErrorAction SilentlyContinue }
+    $gpuName = if ($parentDev) { $parentDev.FriendlyName } else { "Unknown GPU" }
+
+    # WMI InstanceName = PnP InstanceId + "_0" suffix
+    $wmiId   = $wmiIds   | Where-Object { $_.InstanceName -like "$($mon.InstanceId)*" } | Select-Object -First 1
+    $wmiConn = $wmiConns | Where-Object { $_.InstanceName -like "$($mon.InstanceId)*" } | Select-Object -First 1
+
+    $friendlyName = if ($wmiId -and $wmiId.UserFriendlyName) {
+        -join ($wmiId.UserFriendlyName | Where-Object { $_ -ne 0 } | ForEach-Object { [char]$_ })
+    } else { $mon.FriendlyName }
+
+    $connection = if ($wmiConn) { Get-ConnectionName $wmiConn.VideoOutputTechnology } else { "Unknown" }
+
+    [PSCustomObject]@{
+        Monitor    = $friendlyName
+        Connection = $connection
+        GPU        = $gpuName
+        ParentId   = $parentId
+    }
+}
+
+# Group by GPU
+$grouped = $monitorInfo | Group-Object -Property GPU
+
 foreach ($group in $grouped) {
-    # Determine GPU name based on adapter count and nvidia-smi
-    $gpuName = "Unknown GPU"
-    
-    # Check if this is Intel (usually has fewer monitors or specific ID pattern)
-    $monitorCount = $group.Count
-    $firstMonitor = $group.Group[0]
-    
-    # Simple heuristic: query nvidia-smi for display status
-    $nvidiaSmi = nvidia-smi --query-gpu=index,name,display_active --format=csv,noheader 2>$null
-    if ($nvidiaSmi) {
-        $gpus = $nvidiaSmi | ForEach-Object {
-            $parts = $_ -split ', '
-            [PSCustomObject]@{
-                Index = $parts[0].Trim()
-                Name = $parts[1].Trim()
-                DisplayActive = $parts[2].Trim()
-            }
-        }
-        
-        # If only one NVIDIA GPU has displays, and this group has multiple monitors, it's likely that GPU
-        $activeGpu = $gpus | Where-Object { $_.DisplayActive -eq "Enabled" }
-        $inactiveGpu = $gpus | Where-Object { $_.DisplayActive -eq "Disabled" }
-        
-        if ($group.Count -ge 3 -and $activeGpu) {
-            $gpuName = $activeGpu.Name
-        } elseif ($group.Count -eq 1 -and $inactiveGpu) {
-            # Single monitor on a different adapter = likely Intel
-            $gpuName = "Intel Integrated Graphics"
-        }
+    Write-Host "GPU: $($group.Name)" -ForegroundColor Yellow
+    $parentId = $group.Group[0].ParentId
+    if ($parentId) {
+        Write-Host "Adapter: $parentId" -ForegroundColor DarkGray
     }
-    
-    # Also check for Intel adapter
-    $intelAdapter = $adapters | Where-Object { $_.FriendlyName -like "*Intel*" }
-    if ($intelAdapter -and $group.Count -eq 1) {
-        $gpuName = $intelAdapter.FriendlyName
-    }
-    
-    Write-Host "GPU: $gpuName" -ForegroundColor Yellow
-    Write-Host "Adapter ID: $($group.Name)" -ForegroundColor DarkGray
-    Write-Host ""
-    
-    $group.Group | ForEach-Object {
-        Write-Host "  • $($_.Monitor)" -ForegroundColor White -NoNewline
-        Write-Host " ($($_.Connection))" -ForegroundColor Gray
+    foreach ($m in $group.Group) {
+        Write-Host "  • " -NoNewline
+        Write-Host "$($m.Monitor)" -ForegroundColor White -NoNewline
+        Write-Host " ($($m.Connection))" -ForegroundColor Gray
     }
     Write-Host ""
 }
 
-# Summary from nvidia-smi
-Write-Host "=== nvidia-smi Status ===" -ForegroundColor Cyan
-nvidia-smi --query-gpu=index,name,display_active --format=csv
+# nvidia-smi summary (if present)
+$nvsmi = nvidia-smi --query-gpu=index,name,display_active --format=csv 2>$null
+if ($LASTEXITCODE -eq 0 -and $nvsmi) {
+    Write-Host "=== nvidia-smi Status ===" -ForegroundColor Cyan
+    $nvsmi
+}
