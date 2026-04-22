@@ -1,0 +1,20 @@
+mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples
+Gwen-6000-sonnettech-tb5,Command-R+ 104B Q4 [Split],58.44,1004.36,24.58,22.14,0.07,62106,602.37,530.7,936
+Gwen-6000-sonnettech-tb5,Command-R+ 104B Q6 [Split],79.32,820.28,23.06,16.29,0.04,83490,603.03,526.9,1250
+Gwen-6000-sonnettech-tb5,DeepSeek-R1 70B Q4,39.6,1407.05,12.01,31.21,0.08,42124,602.62,547,665
+Gwen-6000-sonnettech-tb5,GPT-OSS 120B MoE MXFP4 [Split],59.03,4894.18,19.24,176.64,9.21,61521,473.44,307.2,187
+Gwen-6000-sonnettech-tb5,GPT-OSS 20B MXFP4,11.28,9472.22,53.05,236.5,15.25,12584,448.22,364.5,101
+Gwen-6000-sonnettech-tb5,Llama 3.1 70B Q6 [Split],53.91,1148.34,10.98,23.66,0.05,56520,604.15,534.5,878
+Gwen-6000-sonnettech-tb5,Llama 3.1 70B Q8 [Split],69.83,1453.61,11.41,19.13,0.66,72568,601.51,522.6,1046
+Gwen-6000-sonnettech-tb5,Llama 3.1 8B Q4,4.58,10511.1,52.44,199.86,7.51,6041,518.92,404.9,100
+Gwen-6000-sonnettech-tb5,Ministral 8B Q4,4.57,9919.16,80.12,193.78,3.88,6062,536.01,449.1,103
+Gwen-6000-sonnettech-tb5,Nemotron-3-Nano 30B MoE Q4,21.27,8029.35,58.18,225.48,6.38,22987,539.81,344.8,112
+Gwen-6000-sonnettech-tb5,Phi-4 14B Q4,8.43,6661.9,40.65,122.49,2.05,10125,602.52,503.5,163
+Gwen-6000-sonnettech-tb5,Qwen 2.5 72B Q4,44.16,1416.29,7.09,28.53,0.06,46690,602.52,539.9,717
+Gwen-6000-sonnettech-tb5,Qwen 2.5 72B Q8 [Split],71.96,1416.44,10.89,18.98,0.03,74558,605.33,528.9,1061
+Gwen-6000-sonnettech-tb5,Qwen 2.5 Coder 32B Q4,18.49,3046.59,13.7,60.05,0.64,20461,602.54,542.2,333
+Gwen-6000-sonnettech-tb5,Qwen 2.5 Coder 32B Q6,25.04,2483.55,12.17,47.88,0.41,26977,604.96,563.7,433
+Gwen-6000-sonnettech-tb5,Qwen 2.5 Coder 7B Q4,4.36,11737.93,126.8,209.6,6.51,5696,525.75,419.2,96
+Gwen-6000-sonnettech-tb5,Qwen 3.5 122B MoE Q4 [NEW Split],69.23,2069.93,11.07,93.3,2.3,72283,495.46,376.8,298
+Gwen-6000-sonnettech-tb5,Qwen 3.5 27B Dense Q6 [NEW],20.91,2115.27,12.91,47.65,0.28,22274,578.4,531.8,420
+Gwen-6000-sonnettech-tb5,Qwen 3.5 35B MoE Q4 [NEW],19.17,4129.93,37.5,136.01,2.2,20903,361.06,306.6,167

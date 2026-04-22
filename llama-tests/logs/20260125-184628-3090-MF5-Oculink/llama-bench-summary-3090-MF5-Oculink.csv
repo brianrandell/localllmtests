@@ -1,0 +1,4 @@
+mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples
+3090-MF5-Oculink,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,3863.39,7.43,118.2,0.12,5572,389.36,371.7,176
+3090-MF5-Oculink,phi-4-Q4_K_M,8.43,2394.4,2.43,75.76,0.08,9380,390.15,375.7,278
+3090-MF5-Oculink,qwen2.5-coder-32b-instruct-q4_k_m,18.49,1135.31,0.95,35.8,0.04,19718,391.9,375.3,595

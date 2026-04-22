@@ -1,0 +1,7 @@
+mode,model,model_size_gb,test,tokens,repetitions,avg_tok_s,stddev_tok_s,gpu_mem_max_mb,gpu_power_max_w,gpu_power_mean_w,gpu_temp_max_c,gpu_util_max_pct,gpu_util_mean_pct,gpu_samples,run_timestamp
+3090-MF5-Oculink,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,pp2048,2048,10,3863.39,7.43,5572,389.36,371.7,62,100,94.4,176,2026-01-25T18:47:21.4906132-08:00
+3090-MF5-Oculink,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,tg512,512,10,118.2,0.12,5572,389.36,371.7,62,100,94.4,176,2026-01-25T18:47:21.4937566-08:00
+3090-MF5-Oculink,phi-4-Q4_K_M,8.43,pp2048,2048,10,2394.4,2.43,9380,390.15,375.7,65,100,97.1,278,2026-01-25T18:48:43.6494532-08:00
+3090-MF5-Oculink,phi-4-Q4_K_M,8.43,tg512,512,10,75.76,0.08,9380,390.15,375.7,65,100,97.1,278,2026-01-25T18:48:43.6632539-08:00
+3090-MF5-Oculink,qwen2.5-coder-32b-instruct-q4_k_m,18.49,pp2048,2048,10,1135.31,0.95,19718,391.9,375.3,66,100,96.5,595,2026-01-25T18:51:37.6291346-08:00
+3090-MF5-Oculink,qwen2.5-coder-32b-instruct-q4_k_m,18.49,tg512,512,10,35.8,0.04,19718,391.9,375.3,66,100,96.5,595,2026-01-25T18:51:37.6300649-08:00

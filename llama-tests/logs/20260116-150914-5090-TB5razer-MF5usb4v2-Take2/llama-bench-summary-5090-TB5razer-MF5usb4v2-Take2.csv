@@ -1,0 +1,5 @@
+mode,model,size_gb,pp_tok_s,pp_stddev,tg_tok_s,tg_stddev,gpu_mem_mb,gpu_power_max_w,gpu_power_mean_w,gpu_samples
+5090-TB5razer-MF5usb4v2-Take2,Ministral-3-8B-Instruct-2512-Q4_K_M,4.84,9264.46,73.87,188.99,0.52,5894,529.23,395.6,110
+5090-TB5razer-MF5usb4v2-Take2,phi-4-Q4_K_M,8.43,6250.25,24.83,129.89,0.21,9702,576.9,483.6,161
+5090-TB5razer-MF5usb4v2-Take2,qwen2.5-coder-32b-instruct-q4_k_m,18.49,2863.7,11.78,63.35,0.08,20040,582.36,514.3,327
+5090-TB5razer-MF5usb4v2-Take2,Qwen2.5-Coder-32B-Instruct-Q6_K,25.04,2388.01,9.37,49.7,0.09,26554,583.81,524.8,420
